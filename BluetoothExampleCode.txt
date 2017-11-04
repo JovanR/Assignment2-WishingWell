@@ -4,6 +4,7 @@
 # cd pybluez
 # sudo python setup.py install
 # sudo python3 setup.py install
+# Need to run sudo hciconfig hci0piscan every reboot
 print("performing inquiry...")
 
 nearby_devices = bluetooth.discover_devices(

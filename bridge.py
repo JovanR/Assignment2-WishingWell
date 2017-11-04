@@ -2,15 +2,10 @@
 import pymongo
 import pika
 import sys
+import time
 from pymongo import MongoClient
 from rmq_params.py import *
 from bluetooth import *
-
-# Create mongo client with default host and port
-# client = MongoClient()
-# Connect host and port
-# client = MongoClient('localhost', 27017)
-# Access database
 
 # rabbitMQHostName = sys.argv[2]
 
@@ -34,11 +29,37 @@ print("Waiting for connection on RFCOMM channel %d" % port)
 client_sock, client_info = server_sock.accept()
 print("Accepted connection from ", client_info)
 
+# Connect host and port
+client = MongoClient('localhost', 27017)
+
+# Access database
+db = client['test-database']  # Same as warehouse?
+collection = db['test-collection']
+posts = db.posts
+
 try:
     while True:
         data = client_sock.recv(1024)
-        if len(data) == 0: break
-        print("received [%s]" % data)
+
+
+        # Message ID
+        ticks = time.time()
+        MsgID = "05$" + str(ticks)
+        print(MsgID)
+
+        # Set up a post to send to the database
+        post = {"Action": "Bob",
+                "Place": "My first blog post!",
+                "MsgID": ["mongodb", "python", "pymongo"],
+                "Subject": "Chairs",
+                "Message": str(MsgID)}
+
+        # Insert into database
+        post_id = posts.insert_one(post)
+
+        # Retrieve from database
+        print(posts.find_one({"Action": "Bob"}))
+
 except IOError:
     pass
 
@@ -47,3 +68,4 @@ print("disconnected")
 client_sock.close()
 server_sock.close()
 print("all done")
+

@@ -1,4 +1,9 @@
 # https://github.com/EnableTech/raspberry-bluetooth-demo
+# sudo apt-get install python-dev libbluetooth-dev
+# git clone https://github.com/karulis/pybluez.git
+# cd pybluez
+# sudo python setup.py install
+# sudo python3 setup.py install
 print("performing inquiry...")
 
 nearby_devices = bluetooth.discover_devices(

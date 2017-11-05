@@ -3,9 +3,12 @@ import pymongo
 import pika
 import sys
 import time
+import bluetooth
 from pymongo import MongoClient
 from rmq_params import *
 from bluetooth import *
+
+
 
 # rabbitMQHostName = sys.argv[2]
 
@@ -17,6 +20,7 @@ server_sock.listen(1)
 port = server_sock.getsockname()[1]
 
 uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+
 # wait for a connection
 advertise_service(server_sock, "SampleServer",
                   service_id=uuid,
@@ -24,8 +28,8 @@ advertise_service(server_sock, "SampleServer",
                   profiles=[SERIAL_PORT_PROFILE],
 #                 protocols = [ OBEX_UUID ]
                   )
-
 print("Waiting for connection on RFCOMM channel %d" % port)
+
 # Connect with device
 client_sock, client_info = server_sock.accept()
 print("Accepted connection from ", client_info)
@@ -36,40 +40,49 @@ client = MongoClient('localhost', 27017)
 # Access database
 dbName = 'test-database'
 db = client[dbName]  # Same as warehouse?
-collection = db['test-collection']
+collectionName = 'test-collection'
+collection = db[collectionName]
 posts = db.posts
 
 # Speak back to bluetooth
-client_sock.send("Available queues")
-for queue in rmq_params:
-    client_sock.send(queue)
+client_sock.send("Available queues: " + '\n')
+for queue in rmq_params['queues']:
+    client_sock.send(queue +'\n')
 
 try:
     while True:
+        # Receive from bluetooth connection
         data = client_sock.recv(1024)
-        data = str(data).split("':")
-        print(data)
-        data = data[1]
-        print(data[0])
+        # Parse trash from data
+        data = str(data).split("'")
+        data = data[1].split(':')
         
+        # Produce
         if data[0] == 'p':
-
-            print('this is for produce')
+            command = data[1].split('"')
+            queueName = command[0]
+            messageText = command[1]
+            
             """""
             channel.basic_publish(exchange='Squires',
                                   routing_key='wishes',
                                   body='I wish I remembered their name')
             """
+        # Consume
         elif data[0] == 'c':
-            print('this is for consume')
+            queueName = data[1]
+            # Parse trash from queueName
+            queueName = queueName.split("\\")
+            queueName = queueName[0]
         
+        # History
         elif data[0] == 'h':
-            print('this is for history')
+            queueName = data[1]
         
         # Message ID
         ticks = time.time()
         MsgID = "05$" + str(ticks)
-        print(MsgID)
+        # print(MsgID)
 
         # Set up a post to send to the database
 ##        post = {"Action": "Bob",

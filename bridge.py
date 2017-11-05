@@ -8,19 +8,22 @@ from pymongo import MongoClient
 from rmq_params import *
 from bluetooth import *
 
-
-
 # rabbitMQHostName = sys.argv[2]
+
+# Channel initialization
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+channel = connection.channel()
 
 # MongoDB Initializations: Connect host and port
 host = 'localhost'
 client = MongoClient(host, 27017)
 
 # Access database
-dbName = 'test-database'
+dbName = rmq_params['exchange']
 db = client[dbName]  # Same as warehouse?
 print("[Checkpoint 01] Connected to database '", dbName, "' on MongoDB server at '", host,"'")
 # MongoDB collection
+# COLLECION NAME SHOULD BE QUEUES
 collectionName = 'test-collection'
 collection = db[collectionName]
 posts = db.posts
@@ -80,15 +83,25 @@ try:
                     "Subject": queueName,
                     "Message": messageText}
             
+            # Publish/Produce to status queue
+            channel.basic_publish(exchange=rmq_params['exchange'],
+                                  routing_key=rmq_params['status_queue'],
+                                  body='purple')
+            print("[Checkpoint p-01] Published message with routing_key: ", rmq_params['status_queue'])
+            print("[Checkpoint p-02] Message: purple")
+            
+            # Publish/Produce via RabbitMQ to exchange
+            channel.basic_publish(exchange=rmq_params['exchange'],
+                                  routing_key=queueName,
+                                  body=messageText)
+            print("[Checkpoint p-01] Published message with routing_key: ", queueName)
+            print("[Checkpoint p-02] Message: ", messageText)
+            
             # Insert into database
             posts.insert(post)
             print("[Checkpoint m-01] Stored document in collection '", collectionName, "' in MongoDB database '", dbName, "'")
             print("[Checkpoint m-02] Document: ", post)
-            """""
-            channel.basic_publish(exchange='Squires',
-                                  routing_key='wishes',
-                                  body='I wish I remembered their name')
-            """
+
         # Consume
         elif data[0] == 'c':
             queueName = data[1]

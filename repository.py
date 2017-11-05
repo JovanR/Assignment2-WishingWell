@@ -27,6 +27,16 @@ for queue in rmq_params['queues']:
                        #routing_key=queue
                        )
 
+#also bind the status queue to the exchange
+channel.queue_declare(rmq_params['status_queue'], exclusive=True)
+channel.queue_purge(rmq_params['status_queue'])
+channel.queue_unbind(exchange=rmq_params['exchange'],
+                     queue=rmq_params['status_queue'])
+channel.queue_bind(exchange=rmq_params['exchange'],
+                   queue=rmq_params['status_queue']
+                   #routing_key=queue
+                   )
+
 #also bind the master queue to the exchange
 channel.queue_declare(rmq_params['master_queue'], exclusive=True)
 channel.queue_purge(rmq_params['master_queue'])
@@ -45,7 +55,14 @@ for queue in rmq_params['queues']:
     channel.queue_bind(exchange=rmq_params['exchange'],
                        queue=rmq_params['master_queue'],
                        routing_key=queue)
-
+    
+#also bind the status queue to the master queue
+channel.queue_unbind(exchange=rmq_params['exchange'],
+                     queue=rmq_params['master_queue'],
+                     routing_key=rmq_params['status_queue'])
+channel.queue_bind(exchange=rmq_params['exchange'],
+                   queue=rmq_params['master_queue'],
+                   routing_key=rmq_params['status_queue'])
 
 def callback(ch, method, properties, body):
     print("%r:%r" % (method.routing_key, body))

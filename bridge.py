@@ -60,9 +60,9 @@ try:
         # Produce
         if data[0] == 'p':
             command = data[1].split('"')
-            queueName = command[0]
+            queueName = command[0].replace(" ","")
             messageText = command[1]
-            
+            print("queueName p:", queueName)
             # Message ID
             ticks = time.time()
             MsgID = "05$" + str(ticks)
@@ -73,9 +73,9 @@ try:
                     "MsgID": MsgID,
                     "Subject": queueName,
                     "Message": messageText}
-            print(post)
+        
             # Insert into database
-            # post_id = posts.insert_one(post).inserted_id
+            posts.insert(post)
             
             """""
             channel.basic_publish(exchange='Squires',
@@ -88,16 +88,15 @@ try:
             # Parse trash from queueName
             queueName = queueName.split("\\")
             queueName = queueName[0]
+            queueName = queueName.replace(" ","")
+            print("queueName: ", queueName)
+            # Retrieve from database
+            print(posts.find_one({"Subject": "food"}))
         
         # History
         elif data[0] == 'h':
             queueName = data[1]
         
-
-##       
-##
-##        # Retrieve from database
-##        print(posts.find_one({"Action": "p"}))
 
 except IOError:
     pass

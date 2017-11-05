@@ -63,6 +63,20 @@ try:
             queueName = command[0]
             messageText = command[1]
             
+            # Message ID
+            ticks = time.time()
+            MsgID = "05$" + str(ticks)
+            
+            # Set up a post to send to the database
+            post = {"Action": data[0],
+                    "Place": "My first blog post!",
+                    "MsgID": MsgID,
+                    "Subject": queueName,
+                    "Message": messageText}
+            print(post)
+            # Insert into database
+            # post_id = posts.insert_one(post).inserted_id
+            
             """""
             channel.basic_publish(exchange='Squires',
                                   routing_key='wishes',
@@ -79,23 +93,11 @@ try:
         elif data[0] == 'h':
             queueName = data[1]
         
-        # Message ID
-        ticks = time.time()
-        MsgID = "05$" + str(ticks)
-        # print(MsgID)
 
-        # Set up a post to send to the database
-##        post = {"Action": "Bob",
-##                "Place": "My first blog post!",
-##                "MsgID": ["mongodb", "python", "pymongo"],
-##                "Subject": "Chairs",
-##                "Message": str(MsgID)}
-
-##        # Insert into database
-##        post_id = posts.insert_one(post)
+##       
 ##
 ##        # Retrieve from database
-##        print(posts.find_one({"Action": "Bob"}))
+##        print(posts.find_one({"Action": "p"}))
 
 except IOError:
     pass

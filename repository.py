@@ -64,13 +64,17 @@ channel.queue_bind(exchange=rmq_params['exchange'],
                    queue=rmq_params['master_queue'],
                    routing_key=rmq_params['status_queue'])
 
+# CHECK THIS IF PRINTING RIGHT!
 def callback(ch, method, properties, body):
     print("%r:%r" % (method.routing_key, body))
+    # JOVAN DO STUFF HERE
+    
 channel.basic_consume(callback,
                       queue=rmq_params['master_queue'],
                       no_ack=True)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
 channel.start_consuming()
+print("[Checkpoint 02] Consuming messages from", rmq_params['master_queue'], " queue")
 
 # DO LAST TWO STEPS!

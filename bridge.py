@@ -22,11 +22,13 @@ client = MongoClient(host, 27017)
 dbName = rmq_params['exchange']
 db = client[dbName]  # Same as warehouse?
 print("[Checkpoint 01] Connected to database '", dbName, "' on MongoDB server at '", host,"'")
+
 # MongoDB collection
 # COLLECION NAME SHOULD BE QUEUES
-collectionName = 'test-collection'
-collection = db[collectionName]
-posts = db.posts
+##for queue in rmq_params['queues']:
+##    collectionName = queue
+##    collection = db[collectionName]
+##posts = db.posts
             
 # Bluetooth initialization
 server_sock = bluetooth.BluetoothSocket(RFCOMM)
@@ -78,7 +80,7 @@ try:
             
             # Set up a post to send to the database
             post = {"Action": data[0],
-                    "Place": "My first blog post!",
+                    "Place": dbName,
                     "MsgID": MsgID,
                     "Subject": queueName,
                     "Message": messageText}
@@ -86,7 +88,7 @@ try:
             # Publish/Produce to status queue
             channel.basic_publish(exchange=rmq_params['exchange'],
                                   routing_key=rmq_params['status_queue'],
-                                  body='purple')
+                                  body="purple")
             print("[Checkpoint p-01] Published message with routing_key: ", rmq_params['status_queue'])
             print("[Checkpoint p-02] Message: purple")
             
@@ -98,8 +100,8 @@ try:
             print("[Checkpoint p-02] Message: ", messageText)
             
             # Insert into database
-            posts.insert(post)
-            print("[Checkpoint m-01] Stored document in collection '", collectionName, "' in MongoDB database '", dbName, "'")
+            db[queueName].insert(post)
+            print("[Checkpoint m-01] Stored document in collection '", queueName, "' in MongoDB database '", dbName, "'")
             print("[Checkpoint m-02] Document: ", post)
 
         # Consume
@@ -109,13 +111,33 @@ try:
             queueName = queueName.split("\\")
             queueName = queueName[0]
             queueName = queueName.replace(" ","")
-            print("queueName: ", queueName)
+            messageText = ""
+            
+            # Message ID
+            ticks = time.time()
+            MsgID = "05$" + str(ticks)
+            
+            # Set up a post to send to the database
+            post = {"Action": data[0],
+                    "Place": dbName,
+                    "MsgID": MsgID,
+                    "Subject": queueName,
+                    "Message": messageText}
+            
+            # Publish/Produce to status queue
+##            channel.basic_publish(exchange=rmq_params['exchange'],
+##                                  routing_key=rmq_params['status_queue'],
+##                                  body="yellow")
+            print("[Checkpoint p-01] Published message with routing_key: ", rmq_params['status_queue'])
+            print("[Checkpoint p-02] Message: yellow")
+            
             # Retrieve from database
-            print(posts.find_one({"Subject": "food"}))
+            print(db[queueName].find_one({"Subject": queueName}))
         
         # History
         elif data[0] == 'h':
-            queueName = data[1]
+            queueName = data[1]    
+            print(db[queueName].find())
         
 
 except IOError:

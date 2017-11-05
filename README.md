@@ -1,5 +1,5 @@
 # Assignment2-WishingWell
-must start mongodb is either "mongod" or "sudo service mongod start"
+must start mongodb is either "mongod" or "sudo service mongodb start"
 must run "sudo hciconfig hci0 piscan" every reboot
 run as "sudo python3 bridge.py"
 
@@ -8,7 +8,7 @@ p:<QUEUE_NAME> "<MESSAGE_TEXT>"
 c:<QUEUE_NAME>
 h:<QUEUE_NAME>
 --examples--
-p:events "what is happen"
+c:events "what is happen"
 p:food "when is dinner"
 p:food "i like burgers"
 h:messages
@@ -20,3 +20,18 @@ c:food
 (output to phone) when is dinner
 c:food
 (output to phone) i like burgers
+
+----checkpoints----
+--bridge--
+[Checkpoint 01] Connected to database 'squires' on MongoDB server at 'localhost'
+[Checkpoint 02] Connected to vhost 'ex_vhost' on RMQ server at 'XXX.XXX.XXX.XXX' as user 'ex_user'
+[Checkpoint 03] Created RFCOMM Bluetooth socket on port 1
+[Checkpoint 04] Accepted RFCOMM Bluetooth connection from ('XX:XX:XX:XX:XX:XX', 1)
+[Checkpoint p-01] Published message with routing_key: 'ex_status'
+[Checkpoint p-02] Message: green
+[Checkpoint 05] Sending Exchange and Queue names
+[Checkpoint 06] Received RFCOMM Bluetooth data: b'p:events "what is happen"'
+[Checkpoint p-01] Published message with routing_key: 'ex_status'
+[Checkpoint p-02] Message: purple
+[Checkpoint m-01] Stored document in collection 'events' in MongoDB database 'squires'
+[Checkpoint m-01] Document: {'Subject': 'events'}

@@ -3,6 +3,7 @@ must start mongodb is either "mongod" or "sudo service mongodb start"
 must run "sudo hciconfig hci0 piscan" every reboot
 run as "sudo python3 bridge.py"
 
+
 --Bluetooth phone Input/Output--
 p:<QUEUE_NAME> "<MESSAGE_TEXT>"
 c:<QUEUE_NAME>
@@ -35,3 +36,18 @@ c:food
 [Checkpoint p-02] Message: purple
 [Checkpoint m-01] Stored document in collection 'events' in MongoDB database 'squires'
 [Checkpoint m-01] Document: {'Subject': 'events'}
+
+--repository--
+[Checkpoint 01] Connected to vhost 'ex_vhost' on RMQ server at 'localhost' at user 'ex_user'
+[Checkpoint 02] Consuming messages from 'ex_master' queue
+[Checkpoint l-01] Flashing LED to green
+[Checkpoint l-01] Flashing LED to purple
+[Checkpoint 03] Consumed a message published with routing_key: 'events'
+[Checkpoint 04] Message: what is happen
+[Checkpoint l-01] Flashing LED to purple
+3
+4
+l-01
+3
+4
+l-01

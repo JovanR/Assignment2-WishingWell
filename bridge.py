@@ -12,6 +12,19 @@ from bluetooth import *
 
 # rabbitMQHostName = sys.argv[2]
 
+# MongoDB Initializations: Connect host and port
+host = 'localhost'
+client = MongoClient(host, 27017)
+
+# Access database
+dbName = 'test-database'
+db = client[dbName]  # Same as warehouse?
+print("[Checkpoint 01] Connected to database '", dbName, "' on MongoDB server at '", host,"'")
+# MongoDB collection
+collectionName = 'test-collection'
+collection = db[collectionName]
+posts = db.posts
+            
 # Bluetooth initialization
 server_sock = bluetooth.BluetoothSocket(RFCOMM)
 server_sock.bind(("", PORT_ANY))
@@ -28,21 +41,11 @@ advertise_service(server_sock, "SampleServer",
                   profiles=[SERIAL_PORT_PROFILE],
 #                 protocols = [ OBEX_UUID ]
                   )
-print("Waiting for connection on RFCOMM channel %d" % port)
+print("[Checkpoint 03] Created RFCOMM Bluetooth socket on port", port)
 
 # Connect with device
 client_sock, client_info = server_sock.accept()
-print("Accepted connection from ", client_info)
-
-# MongoDB Initializations: Connect host and port
-client = MongoClient('localhost', 27017)
-
-# Access database
-dbName = 'test-database'
-db = client[dbName]  # Same as warehouse?
-collectionName = 'test-collection'
-collection = db[collectionName]
-posts = db.posts
+print("[Checkpoint 04] Accepted RFCOMM Bluetooth connection from ", client_info)
 
 # Speak back to bluetooth
 client_sock.send("Available queues: " + '\n')
@@ -53,6 +56,7 @@ try:
     while True:
         # Receive from bluetooth connection
         data = client_sock.recv(1024)
+        print("[Checkpoint 06] Received RFCOMM Bluetooth data: ", data)
         # Parse trash from data
         data = str(data).split("'")
         data = data[1].split(':')
@@ -62,7 +66,7 @@ try:
             command = data[1].split('"')
             queueName = command[0].replace(" ","")
             messageText = command[1]
-            print("queueName p:", queueName)
+                        
             # Message ID
             ticks = time.time()
             MsgID = "05$" + str(ticks)
@@ -73,10 +77,11 @@ try:
                     "MsgID": MsgID,
                     "Subject": queueName,
                     "Message": messageText}
-        
+            
             # Insert into database
             posts.insert(post)
-            
+            print("[Checkpoint m-01] Stored document in collection '", collectionName, "' in MongoDB database '", dbName, "'")
+            print("[Checkpoint m-01] Document: ", post)
             """""
             channel.basic_publish(exchange='Squires',
                                   routing_key='wishes',

@@ -4,7 +4,7 @@ import pika
 import sys
 import time
 from pymongo import MongoClient
-from rmq_params.py import *
+from rmq_params import *
 from bluetooth import *
 
 # rabbitMQHostName = sys.argv[2]
@@ -29,8 +29,10 @@ print("Waiting for connection on RFCOMM channel %d" % port)
 client_sock, client_info = server_sock.accept()
 print("Accepted connection from ", client_info)
 
-# Connect host and port
-client = MongoClient('localhost', 27017)
+# MongoDB Initializations: Connect host and port
+# client = MongoClient('localhost', 27017)
+
+
 
 # Access database
 db = client['test-database']  # Same as warehouse?
@@ -40,25 +42,39 @@ posts = db.posts
 try:
     while True:
         data = client_sock.recv(1024)
-
-
+        data = str(data).split("'")
+        data = data[1]
+        print(data[0])
+        
+        if data[0] == 'p':
+            print('this is for produce')
+            channel.basic_publish(exchange='Squires',
+                                  routing_key='wishes',
+                                  body='I wish I remembered their name')
+            
+        elif data[0] == 'c':
+            print('this is for consume')
+        
+        elif data[0] == 'h':
+            print('this is for history')
+        
         # Message ID
         ticks = time.time()
         MsgID = "05$" + str(ticks)
         print(MsgID)
 
         # Set up a post to send to the database
-        post = {"Action": "Bob",
-                "Place": "My first blog post!",
-                "MsgID": ["mongodb", "python", "pymongo"],
-                "Subject": "Chairs",
-                "Message": str(MsgID)}
+##        post = {"Action": "Bob",
+##                "Place": "My first blog post!",
+##                "MsgID": ["mongodb", "python", "pymongo"],
+##                "Subject": "Chairs",
+##                "Message": str(MsgID)}
 
-        # Insert into database
-        post_id = posts.insert_one(post)
-
-        # Retrieve from database
-        print(posts.find_one({"Action": "Bob"}))
+##        # Insert into database
+##        post_id = posts.insert_one(post)
+##
+##        # Retrieve from database
+##        print(posts.find_one({"Action": "Bob"}))
 
 except IOError:
     pass

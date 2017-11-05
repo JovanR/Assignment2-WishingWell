@@ -48,9 +48,11 @@ client_sock, client_info = server_sock.accept()
 print("[Checkpoint 04] Accepted RFCOMM Bluetooth connection from ", client_info)
 
 # Speak back to bluetooth
+client_sock.send("Communicating on Exchange: "+ dbName + '\n')
 client_sock.send("Available queues: " + '\n')
 for queue in rmq_params['queues']:
     client_sock.send(queue +'\n')
+print("[Checkpoint 05] Sending Exchange and Queue names")
 
 try:
     while True:
@@ -81,7 +83,7 @@ try:
             # Insert into database
             posts.insert(post)
             print("[Checkpoint m-01] Stored document in collection '", collectionName, "' in MongoDB database '", dbName, "'")
-            print("[Checkpoint m-01] Document: ", post)
+            print("[Checkpoint m-02] Document: ", post)
             """""
             channel.basic_publish(exchange='Squires',
                                   routing_key='wishes',

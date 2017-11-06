@@ -11,8 +11,8 @@ from bluetooth import *
 # rabbitMQHostName = sys.argv[2]
 
 # Channel initialization
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-channel = connection.channel()
+##connection = pika.BlockingConnection(pika.ConnectionParameters(host='172.29.81.26'))
+##channel = connection.channel()
 
 # MongoDB Initializations: Connect host and port
 host = 'localhost'
@@ -85,20 +85,20 @@ try:
                     "Subject": queueName,
                     "Message": messageText}
             
-            # Publish/Produce to status queue
-            channel.basic_publish(exchange=rmq_params['exchange'],
-                                  routing_key=rmq_params['status_queue'],
-                                  body="purple")
-            print("[Checkpoint p-01] Published message with routing_key: ", rmq_params['status_queue'])
-            print("[Checkpoint p-02] Message: purple")
-            
-            # Publish/Produce via RabbitMQ to exchange
-            channel.basic_publish(exchange=rmq_params['exchange'],
-                                  routing_key=queueName,
-                                  body=messageText)
-            print("[Checkpoint p-01] Published message with routing_key: ", queueName)
-            print("[Checkpoint p-02] Message: ", messageText)
-            
+##            # Publish/Produce to status queue
+##            channel.basic_publish(exchange=rmq_params['exchange'],
+##                                  routing_key=rmq_params['status_queue'],
+##                                  body="purple")
+##            print("[Checkpoint p-01] Published message with routing_key: ", rmq_params['status_queue'])
+##            print("[Checkpoint p-02] Message: purple")
+##            
+##            # Publish/Produce via RabbitMQ to exchange
+##            channel.basic_publish(exchange=rmq_params['exchange'],
+##                                  routing_key=queueName,
+##                                  body=messageText)
+##            print("[Checkpoint p-01] Published message with routing_key: ", queueName)
+##            print("[Checkpoint p-02] Message: ", messageText)
+##            
             # Insert into database
             db[queueName].insert(post)
             print("[Checkpoint m-01] Stored document in collection '", queueName, "' in MongoDB database '", dbName, "'")
@@ -124,6 +124,7 @@ try:
                     "Subject": queueName,
                     "Message": messageText}
             
+            db[queueName].insert(post)
             # Publish/Produce to status queue
 ##            channel.basic_publish(exchange=rmq_params['exchange'],
 ##                                  routing_key=rmq_params['status_queue'],
@@ -132,12 +133,21 @@ try:
             print("[Checkpoint p-02] Message: yellow")
             
             # Retrieve from database
-            print(db[queueName].find_one({"Subject": queueName}))
+            client_sock.send()
         
         # History
         elif data[0] == 'h':
-            queueName = data[1]    
-            print(db[queueName].find())
+            count = 0
+            queueName = data[1]
+            # Parse trash from queueName
+            queueName = queueName.split("\\")
+            queueName = queueName[0]
+            queueName = queueName.replace(" ","")
+            print("[Checkpoint h-01] Printing history of Collection '" + queueName +"'in MongoDB database '" + dbName + "'")
+            print("[Checkpoint h-02] Collection: ", queueName)
+            for x in db[queueName].find():
+                print("Document"+str(count)+":"+str(x))
+                count = count + 1
         
 
 except IOError:

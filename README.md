@@ -2,7 +2,7 @@
 must start mongodb is either "mongod" or "sudo service mongodb start"
 must run "sudo hciconfig hci0 piscan" every reboot
 run as "sudo python3 bridge.py"
-
+delete from "mongo squires --eval "db.dropDatabase();"
 
 --Bluetooth phone Input/Output--
 p:<QUEUE_NAME> "<MESSAGE_TEXT>"
